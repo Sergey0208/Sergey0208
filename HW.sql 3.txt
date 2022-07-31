@@ -1,0 +1,84 @@
+/*
+1. Верните пользователей у которых верифицированы телефоны и в
+номере которых есть хотя бы одна цифра 3 или тех у которых номер
+заканчивается на 0.
+*/
+select * from user_phones
+         where verify='true' and cast(value as text) like '%3%'
+            or cast(value as text) like '%0';
+/*
+2. Верните всех юзеров их кошельки и транзакции.
+*/
+SELECT *
+FROM "user" JOIN user_billing_wallet ubw on "user".id = ubw.user_id JOIN billing_transaction bt on ubw.id = bt.wallet_id;
+
+/*
+3. Верните никнейм кастомера и ордер у которого нет ревью
+или оценка меньше 5
+*/
+select  nickname, order_id, review_stars
+from "order" full outer join review r on "order".id = r.order_id
+    join "user" u on u.id = "order".customer_id where order_id is null or review_stars<5;
+/*
+4. Верните ид ордера его статус, топик, язык в визуально
+понятном виде(из соответсующих таблиц словарей)
+*/
+select "order".id,status
+from "order" full join lang l on l.id = "order".language_id
+union
+select full_name
+from lang full join order_topics ot on lang.date_created = ot.date_created;
+
+/*
+5. Верните количество успешных транзакций пользователей с разных
+стран
+(в ответе страна и количество транзакций)
+*/
+SELECT country, count(transaction_status) as кількість_транзакіцй
+from billing_transaction
+    join user_billing_wallet ubw on ubw.id = billing_transaction.wallet_id
+    join "user" u on u.id = ubw.user_id
+    where country is not null
+    and transaction_status='SUCCESS' group by country;
+
+/*
+6. Добавте еще один ордер топик в базу данных
+*/
+
+
+insert into order_topics (id,topic_name,date_created,topic_translate,last_update)
+values('126', 'Korotenko_HW3', '2022-07-01 01:22:22.542601 +00:00', '{"UA":"gol"}', '2022-07-01 01:22:22.542601 +00:00');
+
+/*
+7. Обновите комментарий в любом одном из статусов ордеров.
+*/
+
+ update order_status
+set description='в роботе'
+where name ='Bidding'
+    ;
+/*
+8.* Верните ползователей которым более 20 лет.
+(нужно использовать функции а не считать даты)
+*/
+select * from "user"
+                      where age(birthdate) is not null
+                      order by  birthdate desc offset 4;
+/*
+9.** Создайте пользователя(роль клиент), внесите ему телефон в
+таблицу телефонов,
+присвойте ему менджера соответсвующей роли.
+создайте ему кошелек, и одну успешнутю транзакцию.
+а также создайте ему ордер и к данному ордеру ревью.
+(в результате я хочу увидеть пачку запросов которые
+нужно выполнить, один за одним (учтите что в таблце user сломан
+автоинкримент а в дргих нет), последовательность запросов имеет
+значение.)
+*/
+
+/*
+10.** Верните запросы которые позволят вам полностью
+удалить то что будет создано в задании 9.
+(запросы которые постепенно удалят полностью вашего юзера с базы
+данных)
+*/
